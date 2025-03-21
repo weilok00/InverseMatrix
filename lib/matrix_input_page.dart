@@ -135,9 +135,19 @@ String _formatInverseMatrixAsLatex(List<List<String>> matrix) {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Math.tex(
-          r'\text{Matrix Inverse Calculator}', 
-          textStyle: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Math.tex(
+              r'\text{Matrix Inverse Calculator}',
+              textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Image.asset(
+              'images/NTU.webp',
+              height: 200,
+              width: 200,
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
