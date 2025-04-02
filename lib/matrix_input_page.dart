@@ -19,6 +19,9 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
   String errorMessage = "";
   bool showSteps = false;
   List<String> steps = [];
+  List<String> eigenvalueSteps = [];
+  List<String> eigenvectorSteps = [];
+  bool showEigen = false;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -42,6 +45,12 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
     List<List<String>> matrix = matrixControllers.map((row) {
       return row.map((controller) => controller.text).toList();
     }).toList();
+
+    setState(() {
+      eigenvalueSteps.clear();     // 👈 clear eigenvalue steps
+      eigenvectorSteps.clear();    // 👈 clear eigenvector steps
+      showEigen = false;           // 👈 hide eigen section
+    });
 
     try {
       var response = await http.post(
@@ -95,6 +104,47 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
     });
   }
 
+  void _computeEigen() async {
+  List<List<String>> matrix = matrixControllers.map((row) {
+    return row.map((controller) => controller.text).toList();
+  }).toList();
+
+  try {
+    var response = await http.post(
+      Uri.parse('http://localhost:5000/eigen'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'matrix': matrix}),
+    );
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      setState(() {
+        inverseMatrix = "";
+        determinantText = "";
+        steps.clear();
+        showSteps = false;
+
+        // set eigen
+        eigenvalueSteps = List<String>.from(data['eigenvalues']);
+        eigenvectorSteps = List<String>.from(data['eigenvectors']);
+        showEigen = true;
+      });
+
+    } else {
+      var data = jsonDecode(response.body);
+      setState(() {
+        errorMessage = data['error'];
+        showEigen = false;
+      });
+    }
+  } catch (e) {
+    setState(() {
+      errorMessage = "An error occurred: $e";
+      showEigen = false;
+    });
+  }
+}
+
   String _formatInputMatrixAsLatex() {
     String matrixString = r'\begin{bmatrix}';
     for (int i = 0; i < matrixSize; i++) {
@@ -131,7 +181,7 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Math.tex(
-              r'\text{Matrix Inverse Calculator}',
+              r'\text{Inverse \& Eigen Calculator}',
               textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             Image.asset(
@@ -155,7 +205,7 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
             ),
             ListTile(
               leading: const FaIcon(FontAwesomeIcons.tableCellsLarge), 
-              title: Math.tex(r'\text{Matrix Inverse}'),
+              title: Math.tex(r'\text{Inverse \& Eigen}'),
               onTap: () {   
                 Navigator.pushReplacementNamed(context, '/');
               },
@@ -179,6 +229,7 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
               },
               onComputeInverse: _computeInverse,
               onClear: _clearMatrixInputs,
+              onComputeEigen: _computeEigen,
               computeButtonLabel: r'\text{Compute Inverse}',
             ),
             MatrixOutput(
@@ -188,6 +239,9 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
               errorMessage: errorMessage,
               showSteps: showSteps,
               steps: steps,
+              eigenvalueSteps: eigenvalueSteps,
+              eigenvectorSteps: eigenvectorSteps,
+              showEigen: showEigen,
             ),
           ],
         ),

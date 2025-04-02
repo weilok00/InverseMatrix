@@ -7,6 +7,7 @@ class MatrixInput extends StatelessWidget {
   final Function(int) onMatrixSizeChanged;
   final VoidCallback onComputeInverse;
   final VoidCallback onClear;
+  final VoidCallback onComputeEigen;
   final String computeButtonLabel;
 
   const MatrixInput({
@@ -15,6 +16,7 @@ class MatrixInput extends StatelessWidget {
     required this.onMatrixSizeChanged,
     required this.onComputeInverse,
     required this.onClear,
+    required this.onComputeEigen,
     required this.computeButtonLabel,
   });
 
@@ -97,6 +99,23 @@ class MatrixInput extends StatelessWidget {
               ),
             ),
 
+            const SizedBox(height: 15),
+
+            ElevatedButton(
+              onPressed: onComputeEigen,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Math.tex(
+                r'\text{Compute Eigenvalues}',
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
             const SizedBox(height: 15),
 
             ElevatedButton(

@@ -9,6 +9,9 @@ class MatrixOutput extends StatelessWidget {
   final String errorMessage;
   final bool showSteps;
   final List<String> steps;
+  final List<String> eigenvalueSteps;
+  final List<String> eigenvectorSteps;
+  final bool showEigen;
 
   const MatrixOutput({
     required this.inputMatrix,
@@ -17,6 +20,9 @@ class MatrixOutput extends StatelessWidget {
     required this.errorMessage,
     required this.showSteps,
     required this.steps,
+    required this.eigenvalueSteps,      // ✅ Add this
+    required this.eigenvectorSteps,     // ✅ Add this
+    required this.showEigen,
   });
 
   @override
@@ -80,7 +86,6 @@ class MatrixOutput extends StatelessWidget {
               ),
             ],
           ),
-        const SizedBox(height: 10),
 
         if (showSteps)
           MatrixExpansionTile(
@@ -103,6 +108,44 @@ class MatrixOutput extends StatelessWidget {
               );
             }).toList(),
           ),
+        
+          if (showEigen)
+            MatrixExpansionTile(
+              titleContent: [
+                Math.tex(
+                  r'\text{Eigenvalues}',
+                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+              childrenContent: eigenvalueSteps.map((step) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Math.tex(step, textStyle: const TextStyle(fontSize: 16)),
+                  ),
+                );
+              }).toList(),
+            ),
+
+          if (showEigen)
+            MatrixExpansionTile(
+              titleContent: [
+                Math.tex(
+                  r'\text{Eigenvectors}',
+                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+              childrenContent: eigenvectorSteps.map((step) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Math.tex(step, textStyle: const TextStyle(fontSize: 16)),
+                  ),
+                );
+              }).toList(),
+            ),
       ],
     );
   }

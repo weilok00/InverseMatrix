@@ -161,5 +161,86 @@ def matrix_inverse():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/eigen', methods=['POST'])
+def eigen():
+    try:
+        data = request.get_json()
+        matrix_data = data.get('matrix')
+
+        if not matrix_data:
+            return jsonify({"error": "No matrix provided"}), 400
+
+        matrix = parse_matrix(matrix_data)
+        n = matrix.shape[0]
+        λ = sp.Symbol('λ')
+        identity = sp.eye(n)
+
+        lambda_I_minus_A = λ * identity - matrix
+        characteristic_poly = sp.simplify(lambda_I_minus_A.det())
+        eigenvals = sp.solve(characteristic_poly, λ)
+
+        eigenval_steps = [
+            r"\text{Step 1: Form } \lambda I - A",
+            r"\lambda I - A = " + sp.latex(lambda_I_minus_A),
+            r"\text{Step 2: Calculate } \det(\lambda I - A) = 0",
+            r"\det(\lambda I - A) = " + sp.latex(characteristic_poly)
+        ]
+
+        for i, val in enumerate(eigenvals, start=1):
+            eigenval_steps.append(rf"\lambda_{{{i}}} = {sp.latex(val)}")
+
+        eigenvec_steps = [r"\text{Step 3: } (\lambda I - A)\vec{v} = 0"]
+
+        for val in eigenvals:
+            lambdaI_minus_A_val = val * identity - matrix
+            eigenvec_steps.append(rf"\lambda = {sp.latex(val)}:")
+            eigenvec_steps.append(
+                r"\left(" + sp.latex(lambdaI_minus_A_val) + r"\right)\vec{v} = 0"
+            )
+
+            # Solve Ax = 0 manually
+            A_eq = lambdaI_minus_A_val
+            x, y = sp.symbols('x y')
+            vec = sp.Matrix([x, y])
+            eqs = A_eq * vec
+
+            # Show equation system
+            eigenvec_steps.append(
+                r"\Rightarrow " + sp.latex(A_eq[0, 0]) + "x + " + sp.latex(A_eq[0, 1]) + "y = 0"
+            )
+            if n > 1:
+                eigenvec_steps.append(
+                    r"\Rightarrow " + sp.latex(A_eq[1, 0]) + "x + " + sp.latex(A_eq[1, 1]) + "y = 0"
+                )
+
+            # Try solving the symbolic system
+            sols = sp.solve([eqs[0], eqs[1]], (x, y), dict=True)
+            if sols:
+                for s in sols:
+                    simplified = sp.Matrix([s[x] if x in s else x, s[y] if y in s else y])
+                    eigenvec_steps.append(
+                        r"\Rightarrow \vec{v} = " + sp.latex(simplified)
+                    )
+
+            # Also show nullspace vector for generality
+            nullspace = A_eq.nullspace()
+            if nullspace:
+                for idx, v in enumerate(nullspace, 1):
+                    eigenvec_steps.append(
+                        rf"\vec{{v}}_{{\lambda={sp.latex(val)}}}^{idx} = " + sp.latex(v)
+                    )
+            else:
+                eigenvec_steps.append(
+                    rf"\text{{No non-trivial eigenvector found for }} \lambda = {sp.latex(val)}"
+                )
+
+        return jsonify({
+            "eigenvalues": eigenval_steps,
+            "eigenvectors": eigenvec_steps
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
