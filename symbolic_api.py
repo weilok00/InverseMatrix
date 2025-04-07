@@ -200,8 +200,8 @@ def eigen():
 
             # Solve Ax = 0 manually
             A_eq = lambdaI_minus_A_val
-            x, y = sp.symbols('x y')
-            vec = sp.Matrix([x, y])
+            vars = sp.symbols(f'x0:{n}')
+            vec = sp.Matrix(vars)
             eqs = A_eq * vec
 
             # Show equation system
@@ -214,20 +214,20 @@ def eigen():
                 )
 
             # Try solving the symbolic system
-            sols = sp.solve([eqs[0], eqs[1]], (x, y), dict=True)
+            sols = sp.solve(eqs, vars, dict=True)
             if sols:
                 for s in sols:
-                    simplified = sp.Matrix([s[x] if x in s else x, s[y] if y in s else y])
+                    simplified = sp.Matrix([s.get(var, var) for var in vars])
                     eigenvec_steps.append(
-                        r"\Rightarrow \vec{v} = " + sp.latex(simplified)
+                        rf"\vec{{v}}_{{\lambda={sp.latex(val)}}} = " + sp.latex(simplified)
                     )
 
             # Also show nullspace vector for generality
             nullspace = A_eq.nullspace()
             if nullspace:
-                for idx, v in enumerate(nullspace, 1):
+                for v in nullspace:
                     eigenvec_steps.append(
-                        rf"\vec{{v}}_{{\lambda={sp.latex(val)}}}^{idx} = " + sp.latex(v)
+                        rf"\vec{{v}}_{{\lambda={sp.latex(val)}}} = " + sp.latex(v)
                     )
             else:
                 eigenvec_steps.append(

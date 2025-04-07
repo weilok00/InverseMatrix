@@ -101,8 +101,12 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
       errorMessage = "";
       showSteps = false;
       steps.clear();
-    });
-  }
+      
+      showEigen = false;
+      eigenvalueSteps.clear();
+      eigenvectorSteps.clear();
+  });
+}
 
   void _computeEigen() async {
   List<List<String>> matrix = matrixControllers.map((row) {
@@ -186,8 +190,8 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
             ),
             Image.asset(
               'images/NTU.webp',
-              height: 200,
-              width: 200,
+              height: 50,
+              width: 50,
             ),
           ],
         ),
