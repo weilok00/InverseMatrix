@@ -62,8 +62,8 @@ class _MatrixInputPageState extends State<MatrixInputPage> {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
 
-        String determinantLatex = data['determinant'];
-        List<List<String>> inverseMatrixData = (data['inverse'] as List<dynamic>)
+        String determinantLatex = data['determinant']; //store denominator
+        List<List<String>> inverseMatrixData = (data['inverse'] as List<dynamic>) //store numerator
             .map((row) => (row as List<dynamic>).map((e) => e.toString()).toList())
             .toList();
         List<String> stepsData = List<String>.from(data['steps']);

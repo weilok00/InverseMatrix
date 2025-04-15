@@ -129,7 +129,6 @@ def matrix_inverse():
         if determinant == 0:
             return jsonify({"error": "Matrix is singular and cannot be inverted"}), 400
 
-        # Choose formatter
         if format_type == "factored":
             formatter = lambda expr: sp.cancel(sp.together(sp.simplify(expr)))
         elif format_type == "expanded":
